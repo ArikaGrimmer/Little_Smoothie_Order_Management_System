@@ -1,0 +1,64 @@
+# Little Smoothie Order Management System - .gitignore
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+# Build outputs
+dist/
+.output/
+.nuxt/
+.build/
+# Vite/Next/Parcel caches
+.cache/
+.parcel-cache/
+.next/
+# TypeScript intermediate files
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+# Log files
+logs/
+*.log
+*.log.*
+# Coverage
+coverage/
+coverage-final.json
+.nyc_output/
+# Runtime files
+pids/
+*.pid
+*.seed
+# Environment files (don't commit secrets). Keep .env.example in repo.
+.env
+.env.*
+!.env.example
+# OS files
+.DS_Store
+Thumbs.db
+# Editor/IDE
+.vscode/
+.idea/
+*.sublime-* 
+# Docker
+docker-compose.override.yml
+docker-compose.local.yml
+.docker/
+# Kubernetes / local manifests
+.k8s/
+# Database / local data
+/data/
+/data-db/
+*.sqlite
+# npm package lock is intentionally tracked; do not ignore lockfiles
+# Misc
+*.tgz
+*.log
+# Yarn PnP
+.pnp.cjs
+.pnp.js
+# Storybook
+.out/
+# Optional: ignore local build outputs from other tools
+build/
+# End of file
