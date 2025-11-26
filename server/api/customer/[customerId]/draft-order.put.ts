@@ -1,6 +1,15 @@
 import { getDB } from "../../../utils/mongo";
 
 export default defineEventHandler(async (event) => {
+  // Require authentication
+  const session = await getUserSession(event)
+  if (!session.user) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Unauthorized'
+    })
+  }
+
   const customerId = event.context.params?.customerId;
   const body = await readBody(event);
 
@@ -9,6 +18,15 @@ export default defineEventHandler(async (event) => {
       statusCode: 400,
       statusMessage: "Missing customerId",
     });
+  }
+
+  // Verify the user is updating their own draft order
+  const userEmail = (session.user as any).email || (session.user as any).id
+  if (customerId !== userEmail) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Forbidden: Cannot update another user\'s draft order'
+    })
   }
 
   // Extract fields from client request
