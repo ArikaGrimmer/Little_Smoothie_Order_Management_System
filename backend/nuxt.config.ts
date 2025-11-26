@@ -3,6 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true }, 
   runtimeConfig: {
-    mongoUrl: process.env.MONGO_URL
+    mongoUrl: process.env.MONGO_URL, 
+    redisUrl: process.env.REDIS_URL
   }
 })
