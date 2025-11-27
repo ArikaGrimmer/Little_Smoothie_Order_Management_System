@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Socket.IO Test</title>
+    <style>
+      body { font-family: system-ui, Arial; padding: 20px }
+      #messages { border: 1px solid #ddd; padding: 10px; height: 200px; overflow: auto }
+    </style>
+  </head>
+  <body>
+    <h2>Socket.IO test client</h2>
+    <div>
+      Socket server: <input id="server" value="http://localhost:4001" style="width:300px" />
+      <button id="connect">Connect</button>
+    </div>
+    <div style="margin-top:8px">
+      Room: <input id="room" value="order:123" />
+      <button id="join">Join</button>
+      <button id="leave">Leave</button>
+    </div>
+    <div id="messages"></div>
+    <div style="margin-top:8px">
+      <input id="text" style="width:60%" /> <button id="send">Send</button>
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.0/socket.io.min.js"></script>
+    <script>
+      let socket;
+      const messages = document.getElementById('messages');
+      function log(m){ const el=document.createElement('div'); el.textContent=typeof m==='string'?m:JSON.stringify(m); messages.appendChild(el); messages.scrollTop = messages.scrollHeight; }
+
+      document.getElementById('connect').onclick = () => {
+        const server = document.getElementById('server').value;
+        try {
+          console.log('[test] attempting connect to', server);
+          // do not force transports — allow default polling->upgrade flow
+          socket = io(server, { auth: { token: 'dev-user-1' } });
+
+          socket.on('connect', () => { console.log('[test] connected', socket.id); log('connected: ' + socket.id); });
+          socket.on('connect_error', (err) => { console.error('[test] connect_error', err); log('connect_error: ' + err.message || err); });
+          socket.on('error', (err) => { console.error('[test] error', err); log('error: ' + err); });
+          socket.on('message', (m) => { console.log('[test] message', m); log('msg: ' + JSON.stringify(m)); });
+          socket.on('presence', (p) => { console.log('[test] presence', p); log('presence: ' + JSON.stringify(p)); });
+          socket.on('disconnect', (reason) => { console.log('[test] disconnected', reason); log('disconnected: ' + reason); });
+        } catch (e) {
+          console.error('[test] connect exception', e);
+          log('connect exception: ' + e.message);
+        }
+      }
+
+      let joined = false;
+      let joinedRoom = null;
+
+      document.getElementById('join').onclick = () => {
+        const room = document.getElementById('room').value;
+        if (!socket) return alert('connect first');
+        socket.emit('join', room, (res) => {
+          if (res && res.ok) {
+            joined = true;
+            joinedRoom = res.room;
+            log('joined ' + res.room);
+          } else {
+            log('join failed: ' + JSON.stringify(res));
+          }
+        });
+      }
+
+      document.getElementById('leave').onclick = () => {
+        const room = document.getElementById('room').value;
+        if (!socket) return alert('connect first');
+        socket.emit('leave', room, (res) => {
+          joined = false;
+          joinedRoom = null;
+          log('left ' + room);
+        });
+      }
+
+      document.getElementById('send').onclick = () => {
+        const text = document.getElementById('text').value;
+        const room = document.getElementById('room').value;
+        if (!socket) return alert('connect first');
+        if (!joined || room !== joinedRoom) return alert('join the room first');
+        socket.emit('message', { room, text }, (ack) => {
+          if (ack && ack.ok) {
+            log('sent ack id=' + ack.id + ' ts=' + ack.ts);
+          } else {
+            log('send failed: ' + JSON.stringify(ack));
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
