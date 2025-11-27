@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"customerId":{"$numberInt":"1"},"status":{"$numberInt":"1"}},"name":"customerId_1_status_1","unique":true,"partialFilterExpression":{"status":"draft"}}],"uuid":"13d5278df43842cf94353bed28b81cc8","collectionName":"orders","type":"collection"}

@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"}],"uuid":"825af81a0e4b4dba8f33a7c1e3c54cb0","collectionName":"smoothie_bases","type":"collection"}
