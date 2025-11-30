@@ -18,21 +18,17 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
-# OS
+# Misc
 .DS_Store
 .fleet
 .idea
 
-# Vim
-*.swp
-*.swo
-
-# Environment variables
+# Local env files
 .env
 .env.*
 !.env.example
 
-# Misc
-*.local
-
-
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
