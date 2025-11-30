@@ -99,6 +99,16 @@
               📋 Status: {{ formatStatus(order.status) }}
             </div>
           </div>
+          <div class="order-actions">
+            <!-- Show Chat button only for queued or blending orders -->
+            <NuxtLink
+              v-if="order.status === 'queued' || order.status === 'blending'"
+              :to="`/customer/chat/${order.id}`"
+              class="btn btn-outline"
+            >
+              💬 Chat about this order
+            </NuxtLink>
+          </div>
         </div>
       </div>
     </div>
