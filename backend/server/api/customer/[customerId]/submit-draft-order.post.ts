@@ -32,10 +32,11 @@ export default defineEventHandler(async (event) => {
   }
 
   // Step 2: Validate basic required fields
-  if (!draft.baseId || !draft.sizeId) {
+  // Order must have either baseId (old menu system) or menuItemId (new menu system)
+  if ((!draft.baseId && !draft.menuItemId) || !draft.sizeId) {
     throw createError({
       statusCode: 400,
-      statusMessage: "Draft order is incomplete"
+      statusMessage: "Draft order is incomplete. Please select a base/menu item and size."
     });
   }
 

@@ -13,19 +13,20 @@
     </header>
 
     <div class="container">
-      <div class="quick-actions">
-        <NuxtLink to="/operator/menu" class="action-card">
-          <div class="action-icon">📋</div>
-          <div class="action-text">
-            <h3>Menu Management</h3>
-            <p>Add, edit, or remove menu items</p>
+      <!-- Orders Panel -->
+      <div class="panel orders-panel">
+          <div class="panel-header">
+            <h2>📋 View Orders</h2>
+            <div class="panel-stats">
+              <span class="stat-badge queue">{{ queuedOrders.length }} Queued</span>
+              <span class="stat-badge progress">{{ blendingOrders.length }} In Progress</span>
+              <span class="stat-badge ready">{{ readyOrders.length }} Ready</span>
+            </div>
           </div>
-        </NuxtLink>
-      </div>
-
-      <div v-if="loading" class="loading">Loading orders...</div>
-      
-      <div v-else class="dashboard">
+          
+          <div v-if="loading" class="loading">Loading orders...</div>
+          
+          <div v-else class="dashboard">
         <!-- Queued Orders -->
         <div class="orders-section">
           <h2>📋 Queued Orders</h2>
@@ -39,11 +40,17 @@
               class="order-card queued"
             >
               <div class="order-header">
-                <span class="order-id">Order #{{ order.id.slice(-6) }}</span>
+                <div>
+                  <span class="order-id">Order #{{ order.id.slice(-6) }}</span>
+                  <p class="customer-name" v-if="order.customerName">👤 {{ order.customerName }}</p>
+                </div>
                 <span class="order-price">${{ order.price?.toFixed(2) }}</span>
               </div>
               <div class="order-details">
-                <p><strong>Base:</strong> {{ getBaseName(order.baseId) }}</p>
+                <p v-if="order.drinkName || order.menuItemName" class="drink-name">
+                  <strong>Drink:</strong> {{ order.drinkName || order.menuItemName }}
+                </p>
+                <p v-if="order.baseId"><strong>Base:</strong> {{ getBaseName(order.baseId) }}</p>
                 <p><strong>Size:</strong> {{ getSizeName(order.sizeId) }}</p>
                 <p v-if="order.fruitIds?.length"><strong>Fruits:</strong> {{ getFruitNames(order.fruitIds) }}</p>
                 <p><strong>Sweetness:</strong> {{ order.sweetness }}%</p>
@@ -70,11 +77,17 @@
               class="order-card blending"
             >
               <div class="order-header">
-                <span class="order-id">Order #{{ order.id.slice(-6) }}</span>
+                <div>
+                  <span class="order-id">Order #{{ order.id.slice(-6) }}</span>
+                  <p class="customer-name" v-if="order.customerName">👤 {{ order.customerName }}</p>
+                </div>
                 <span class="order-price">${{ order.price?.toFixed(2) }}</span>
               </div>
               <div class="order-details">
-                <p><strong>Base:</strong> {{ getBaseName(order.baseId) }}</p>
+                <p v-if="order.drinkName || order.menuItemName" class="drink-name">
+                  <strong>Drink:</strong> {{ order.drinkName || order.menuItemName }}
+                </p>
+                <p v-if="order.baseId"><strong>Base:</strong> {{ getBaseName(order.baseId) }}</p>
                 <p><strong>Size:</strong> {{ getSizeName(order.sizeId) }}</p>
                 <p v-if="order.fruitIds?.length"><strong>Fruits:</strong> {{ getFruitNames(order.fruitIds) }}</p>
                 <p><strong>Sweetness:</strong> {{ order.sweetness }}%</p>
@@ -112,7 +125,8 @@
             </div>
           </div>
         </div>
-      </div>
+          </div>
+        </div>
     </div>
   </div>
 </template>
@@ -316,45 +330,56 @@ useHead({
 
 .container {
   padding: 2rem;
-  max-width: 1600px;
+  max-width: 1800px;
   margin: 0 auto;
 }
 
-.quick-actions {
-  margin-bottom: 2rem;
-}
-
-.action-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.panel {
   background: white;
-  padding: 1.5rem;
   border-radius: 12px;
-  text-decoration: none;
-  transition: all 0.3s ease;
+  padding: 2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  max-width: 400px;
 }
 
-.action-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
 }
 
-.action-icon {
-  font-size: 3rem;
-}
-
-.action-text h3 {
-  margin: 0 0 0.25rem 0;
+.panel-header h2 {
+  margin: 0;
   color: #333;
 }
 
-.action-text p {
-  margin: 0;
-  color: #666;
-  font-size: 0.9rem;
+.panel-stats {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.stat-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.stat-badge.queue {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.stat-badge.progress {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.stat-badge.ready {
+  background: #d4edda;
+  color: #155724;
 }
 
 .loading {
@@ -422,10 +447,24 @@ h2 {
 .order-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.order-header .customer-name {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: normal;
+}
+
+.drink-name {
+  font-size: 1.1rem;
+  color: #4facfe;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .order-id {
@@ -503,6 +542,11 @@ h2 {
   }
   
   .stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .panel-stats {
     flex-direction: column;
     gap: 0.5rem;
   }

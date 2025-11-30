@@ -20,18 +20,46 @@
 
         <!-- Divider -->
         <div class="divider">
-          <span>Or for demo</span>
+          <span>or</span>
         </div>
 
-        <!-- Demo Login (for development) -->
-        <button
-          @click="signInDemo"
-          :disabled="loading.demo"
-          class="login-btn demo-btn"
-        >
-          <span class="btn-icon">👤</span>
-          <span>{{ loading.demo ? 'Signing in...' : 'Demo Login' }}</span>
-        </button>
+        <!-- Demo Login Options -->
+        <div class="demo-login-section">
+          <p class="demo-label">Try as Demo User:</p>
+          <div class="demo-buttons">
+            <button 
+              @click="signInAsDemo('customer')"
+              :disabled="loading.demoCustomer"
+              class="login-btn demo-btn demo-customer-btn"
+            >
+              <span class="btn-icon">👤</span>
+              <span>{{ loading.demoCustomer ? 'Signing in...' : 'Demo Customer' }}</span>
+            </button>
+            <button 
+              @click="signInAsDemo('operator')"
+              :disabled="loading.demoOperator"
+              class="login-btn demo-btn demo-operator-btn"
+            >
+              <span class="btn-icon">👨‍🍳</span>
+              <span>{{ loading.demoOperator ? 'Signing in...' : 'Demo Operator' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="route.query.error" class="error-message">
+        <p v-if="route.query.error === 'github_auth_failed'">
+          ❌ GitHub authentication failed. This is usually caused by a "state mismatch" error.
+        </p>
+        <p v-else-if="route.query.error === 'github_config_missing'">
+          ❌ GitHub OAuth is not configured. Please set NUXT_OAUTH_GITHUB_CLIENT_ID and NUXT_OAUTH_GITHUB_CLIENT_SECRET in your .env file.
+        </p>
+        <p v-else>
+          ❌ An error occurred during authentication.
+        </p>
+        <p v-if="route.query.error === 'github_auth_failed'" style="margin-top: 0.5rem; font-size: 0.85rem;">
+          <strong>Try this:</strong> Clear your browser cookies for this site, close other tabs, and try again.
+        </p>
       </div>
 
       <div class="login-footer">
@@ -47,10 +75,13 @@ definePageMeta({
   layout: false
 })
 
+const route = useRoute()
+const router = useRouter()
 const { loggedIn } = useUserSession()
 const loading = ref({
   github: false,
-  demo: false
+  demoCustomer: false,
+  demoOperator: false
 })
 
 // Redirect if already logged in
@@ -72,23 +103,29 @@ async function signInWithGitHub() {
   }
 }
 
-async function signInDemo() {
-  loading.value.demo = true
+async function signInAsDemo(role: 'customer' | 'operator') {
+  const loadingKey = role === 'customer' ? 'demoCustomer' : 'demoOperator'
+  loading.value[loadingKey] = true
+  
   try {
     const response = await $fetch('/api/auth/demo', {
-      method: 'POST'
+      method: 'POST',
+      body: { role }
     })
-
-    if (response) {
-      await navigateTo('/')
+    
+    if (response.ok) {
+      // Use full page reload to ensure session is properly read
+      window.location.href = '/'
+    } else {
+      throw new Error('Demo login failed')
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Demo login error:', error)
-    alert('Failed to sign in with demo. Please try again.')
-  } finally {
-    loading.value.demo = false
+    alert(`Failed to sign in as demo ${role}. Please try again.`)
+    loading.value[loadingKey] = false
   }
 }
+
 </script>
 
 <style scoped>
@@ -180,38 +217,65 @@ async function signInDemo() {
   color: white;
 }
 
-.demo-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-}
-
-.demo-btn:hover:not(:disabled) {
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
 .divider {
-  position: relative;
+  display: flex;
+  align-items: center;
   text-align: center;
-  margin: 0.5rem 0;
+  margin: 1.5rem 0;
+  color: #999;
 }
 
-.divider::before {
+.divider::before,
+.divider::after {
   content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
-  background: #e0e0e0;
+  flex: 1;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .divider span {
-  position: relative;
-  background: white;
   padding: 0 1rem;
-  color: #999;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
+}
+
+.demo-login-section {
+  margin-top: 1rem;
+}
+
+.demo-label {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.demo-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.demo-btn {
+  flex: 1;
+}
+
+.demo-customer-btn {
+  border-color: #f093fb;
+  color: #f5576c;
+}
+
+.demo-customer-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.demo-operator-btn {
+  border-color: #4facfe;
+  color: #00f2fe;
+}
+
+.demo-operator-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
 }
 
 .login-footer {
@@ -223,6 +287,21 @@ async function signInDemo() {
   font-size: 0.75rem;
   color: #999;
   line-height: 1.4;
+}
+
+.error-message {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 8px;
+  color: #c62828;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.error-message p {
+  margin: 0;
 }
 
 @media (max-width: 640px) {

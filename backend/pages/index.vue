@@ -8,6 +8,19 @@
       <p class="subtitle">Select your role to continue</p>
       
       <div class="role-cards">
+        <ClientOnly>
+          <NuxtLink v-if="hasOperatorRole" to="/operator" class="role-card operator-card">
+            <div class="icon">👨‍🍳</div>
+            <h2>Manage Orders</h2>
+            <p>View and process customer orders</p>
+          </NuxtLink>
+          <NuxtLink v-if="hasOperatorRole" to="/operator/menu" class="role-card menu-management-card">
+            <div class="icon">📝</div>
+            <h2>Manage Menu</h2>
+            <p>Add, edit, or remove menu items</p>
+          </NuxtLink>
+        </ClientOnly>
+        
         <NuxtLink to="/menu" class="role-card menu-card">
           <div class="icon">📋</div>
           <h2>Browse Menu</h2>
@@ -20,10 +33,10 @@
           <p>Build a custom smoothie</p>
         </NuxtLink>
         
-        <NuxtLink to="/operator" class="role-card operator-card">
-          <div class="icon">👨‍🍳</div>
-          <h2>Operator</h2>
-          <p>Manage orders and menu</p>
+        <NuxtLink to="/customer/orders" class="role-card orders-card">
+          <div class="icon">📦</div>
+          <h2>View Current Order</h2>
+          <p>Check your order status</p>
         </NuxtLink>
       </div>
     </div>
@@ -31,6 +44,16 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
+const { user } = useUserSession()
+
+// Check if user has operator role
+const hasOperatorRole = computed(() => {
+  const userRoles = (user.value as any)?.roles || []
+  return userRoles.includes('operator')
+})
+
 useHead({
   title: 'Little Smoothie - Home'
 })
@@ -106,8 +129,18 @@ h1 {
   color: #333;
 }
 
+.orders-card:hover {
+  background: linear-gradient(135deg, #4facfe 0%, #764ba2 100%);
+  color: white;
+}
+
 .operator-card:hover {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.menu-management-card:hover {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
   color: white;
 }
 

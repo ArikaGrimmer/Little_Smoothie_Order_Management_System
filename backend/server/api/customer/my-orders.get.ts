@@ -12,13 +12,15 @@ export default defineEventHandler(async (event) => {
   const db = await getDB();
   const orders = db.collection("orders");
 
-  // Get all orders for this user (excluding draft)
+  // Get ALL orders for this user (including drafts)
   const userOrders = await orders
     .find({ 
-      customerId: userId,
-      status: { $ne: "draft" } // Exclude draft orders
+      customerId: userId
     })
-    .sort({ submittedAt: -1 }) // Newest first
+    .sort({ 
+      submittedAt: -1,  // Submitted orders first (newest)
+      createdAt: -1     // Then by creation date for drafts
+    })
     .toArray();
 
   // Convert ObjectId to string

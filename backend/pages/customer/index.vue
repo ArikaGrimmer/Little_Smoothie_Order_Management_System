@@ -22,9 +22,6 @@
           </div>
           <div class="base-price">Base Price: ${{ selectedMenuItem.basePrice.toFixed(2) }}</div>
         </div>
-        <button @click="clearSelection" class="change-item-btn">
-          Change Item
-        </button>
       </div>
 
       <div v-if="loading" class="loading">Loading menu...</div>
@@ -302,38 +299,65 @@ async function loadDraftOrder() {
 }
 
 async function saveDraft() {
-  if (!canSave.value) return
+  if (!canSave.value) return false
   
   try {
+    const payload = {
+      ...order.value,
+      menuItemId: selectedMenuItem.value?.id || null,
+      menuItemName: selectedMenuItem.value?.name || null,
+      basePrice: selectedMenuItem.value?.basePrice || null,
+      calculatedPrice: calculatedPrice.value
+    }
+    
     const response = await fetch(`/api/customer/${customerId.value}/draft-order`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(order.value)
+      body: JSON.stringify(payload)
     })
     const data = await response.json()
     if (data.ok) {
       currentOrder.value = data.order
-      alert('Draft saved successfully!')
+      return true
     }
+    return false
   } catch (e) {
-    alert('Failed to save draft')
+    console.error('Failed to save draft:', e)
+    return false
   }
 }
 
 async function submitOrder() {
   if (!canSubmit.value) return
   
-  // First save the draft to ensure it's up to date
-  await saveDraft()
-  
   try {
+    // First save the draft to ensure it's up to date with menu item info
+    const saveResult = await saveDraft()
+    if (!saveResult) {
+      alert('Failed to save draft. Please try again.')
+      return
+    }
+    
+    // Small delay to ensure draft is saved
+    await new Promise(resolve => setTimeout(resolve, 100))
+    
+    // Now submit the draft
     const response = await fetch(`/api/customer/${customerId.value}/submit-draft-order`, {
       method: 'POST'
     })
     const data = await response.json()
-    if (data.ok) {
+    
+    if (data.ok && data.order) {
+      // Update current order with the submitted order (status should be "queued")
       currentOrder.value = data.order
+      
+      console.log('Order submitted successfully, status:', data.order.status)
+      
       alert('Order submitted successfully!')
+      
+      // Clear the selected menu item
+      selectedMenuItem.value = null
+      
       // Reset form
       order.value = {
         baseId: '',
@@ -343,9 +367,18 @@ async function submitOrder() {
         iceLevel: 100,
         extraNote: ''
       }
+      
+      // Clear currentOrder after a moment so user can start a new order
+      setTimeout(() => {
+        currentOrder.value = null
+      }, 3000)
+    } else {
+      throw new Error(data.statusMessage || 'Failed to submit order')
     }
-  } catch (e) {
-    alert('Failed to submit order')
+  } catch (e: any) {
+    console.error('Submit order error:', e)
+    const errorMessage = e.data?.statusMessage || e.message || 'Failed to submit order'
+    alert(`Failed to submit order: ${errorMessage}`)
   }
 }
 

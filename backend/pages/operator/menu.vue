@@ -1,7 +1,7 @@
 <template>
   <div class="operator-menu-page" style="min-height: 100vh; background: #f5f7fa;">
       <header class="header">
-        <NuxtLink to="/operator" class="back-button">← Back to Dashboard</NuxtLink>
+        <NuxtLink to="/" class="back-button">← Back to Dashboard</NuxtLink>
         <h1>📋 Menu Management</h1>
         <UserProfile />
       </header>
