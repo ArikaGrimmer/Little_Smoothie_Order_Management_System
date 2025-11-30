@@ -3,7 +3,7 @@
     <header class="header">
       <NuxtLink to="/" class="back-button">← Back</NuxtLink>
       <h1>🥤 Order Your Smoothie</h1>
-      <div class="customer-id">Customer: {{ customerId }}</div>
+      <UserProfile />
     </header>
 
     <div class="container">
@@ -154,8 +154,9 @@ interface Order {
   extraNote: string
 }
 
-// Generate a simple customer ID (in production, use proper auth)
-const customerId = ref(`customer-${Math.random().toString(36).substr(2, 9)}`)
+// Get customer ID from authenticated session
+const { user } = useUserSession()
+const customerId = computed(() => (user.value as any)?.email || 'guest')
 
 const menu = ref<Menu>({ bases: [], fruits: [], sizes: [] })
 const order = ref<Order>({

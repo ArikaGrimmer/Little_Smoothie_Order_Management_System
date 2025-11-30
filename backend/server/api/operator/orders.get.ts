@@ -1,6 +1,9 @@
 import { getDB } from "../../utils/mongo";
+import { requireRole } from "../../utils/auth";
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  // Require operator role
+  await requireRole(event, 'operator');
   const db = await getDB();
   const orders = db.collection("orders");
 

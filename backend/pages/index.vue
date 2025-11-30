@@ -1,5 +1,8 @@
 <template>
   <div class="home-page">
+    <div class="top-nav">
+      <UserProfile />
+    </div>
     <div class="container">
       <h1>🥤 Little Smoothie Order System</h1>
       <p class="subtitle">Select your role to continue</p>
@@ -35,6 +38,14 @@ useHead({
   justify-content: center;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 2rem;
+  position: relative;
+}
+
+.top-nav {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  z-index: 100;
 }
 
 .container {

@@ -3,9 +3,12 @@
     <header class="header">
       <NuxtLink to="/" class="back-button">← Back</NuxtLink>
       <h1>👨‍🍳 Operator Dashboard</h1>
-      <div class="stats">
-        <span class="stat">Queue: {{ queuedOrders.length }}</span>
-        <span class="stat">In Progress: {{ blendingOrders.length }}</span>
+      <div class="header-right">
+        <div class="stats">
+          <span class="stat">Queue: {{ queuedOrders.length }}</span>
+          <span class="stat">In Progress: {{ blendingOrders.length }}</span>
+        </div>
+        <UserProfile />
       </div>
     </header>
 
@@ -264,6 +267,12 @@ useHead({
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
 }
 
 .back-button {

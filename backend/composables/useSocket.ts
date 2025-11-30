@@ -6,14 +6,15 @@ export function useSocket() {
   const connected = ref(false)
   const error = ref<string>('')
 
-  const connect = (token?: string) => {
+  const connect = (user?: any) => {
     try {
       const socketUrl = process.env.NODE_ENV === 'production'
         ? 'wss://your-production-url.com'
         : 'http://localhost:4001'
 
+      // Pass user data from session for authentication
       socket.value = io(socketUrl, {
-        auth: token ? { token } : undefined,
+        auth: user ? { user } : undefined,
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionDelay: 1000,
