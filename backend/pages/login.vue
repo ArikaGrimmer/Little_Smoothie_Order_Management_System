@@ -54,11 +54,23 @@
         <p v-else-if="route.query.error === 'github_config_missing'">
           ❌ GitHub OAuth is not configured. Please set NUXT_OAUTH_GITHUB_CLIENT_ID and NUXT_OAUTH_GITHUB_CLIENT_SECRET in your .env file.
         </p>
+        <p v-else-if="route.query.error === 'cookie_blocked'">
+          ❌ Cookies are blocked. Mobile browsers often block cookies for IP addresses.
+          <br><strong>Solution:</strong> Use a domain name like <code>192.168.4.186.nip.io:3000</code> instead of the IP address.
+        </p>
         <p v-else>
           ❌ An error occurred during authentication.
         </p>
         <p v-if="route.query.error === 'github_auth_failed'" style="margin-top: 0.5rem; font-size: 0.85rem;">
           <strong>Try this:</strong> Clear your browser cookies for this site, close other tabs, and try again.
+        </p>
+      </div>
+      
+      <div v-if="demoError" class="error-message">
+        <p>{{ demoError }}</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+          <strong>Mobile Browser Issue:</strong> If you're accessing via IP address (like 192.168.x.x), 
+          your browser may be blocking cookies. Try using <code>192.168.4.186.nip.io:3000</code> instead.
         </p>
       </div>
 
@@ -83,6 +95,7 @@ const loading = ref({
   demoCustomer: false,
   demoOperator: false
 })
+const demoError = ref('')
 
 // Redirect if already logged in
 watch(loggedIn, (isLoggedIn) => {
@@ -106,22 +119,52 @@ async function signInWithGitHub() {
 async function signInAsDemo(role: 'customer' | 'operator') {
   const loadingKey = role === 'customer' ? 'demoCustomer' : 'demoOperator'
   loading.value[loadingKey] = true
+  demoError.value = ''
   
   try {
+    // Use $fetch to call the API
     const response = await $fetch('/api/auth/demo', {
       method: 'POST',
       body: { role }
     })
     
+    console.log('[Demo Login] Response received:', response)
+    
     if (response.ok) {
-      // Use full page reload to ensure session is properly read
-      window.location.href = '/'
+      // Small delay to ensure cookie is set
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      // Refresh the session to ensure it's loaded
+      const { refresh } = useUserSession()
+      try {
+        await refresh()
+      } catch (refreshError) {
+        console.warn('[Demo Login] Session refresh failed, continuing anyway:', refreshError)
+      }
+      
+      // Redirect to home page using full URL
+      const baseUrl = window.location.origin
+      console.log('[Demo Login] Redirecting to:', baseUrl + '/')
+      window.location.href = baseUrl + '/'
     } else {
-      throw new Error('Demo login failed')
+      throw new Error('Demo login failed: Server returned ok=false')
     }
   } catch (error: any) {
     console.error('Demo login error:', error)
-    alert(`Failed to sign in as demo ${role}. Please try again.`)
+    console.error('Demo login error details:', {
+      message: error?.message,
+      name: error?.name,
+      statusCode: error?.statusCode,
+      data: error?.data
+    })
+    
+    // Check if it's a network error (HTTP 0)
+    if (error?.message?.includes('HTTP 0') || error?.name === 'FetchError') {
+      demoError.value = `Network error: Could not connect to server. Make sure the server is running and accessible at ${window.location.origin}`
+    } else {
+      const errorMsg = error?.data?.statusMessage || error?.message || 'Unknown error'
+      demoError.value = `Failed to sign in as demo ${role}: ${errorMsg}`
+    }
     loading.value[loadingKey] = false
   }
 }
@@ -239,6 +282,10 @@ async function signInAsDemo(role: 'customer' | 'operator') {
 
 .demo-login-section {
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 .demo-label {
@@ -247,15 +294,19 @@ async function signInAsDemo(role: 'customer' | 'operator') {
   font-size: 0.9rem;
   margin-bottom: 0.75rem;
   font-weight: 500;
+  width: 100%;
 }
 
 .demo-buttons {
   display: flex;
   gap: 0.75rem;
+  width: 100%;
+  justify-content: center;
 }
 
 .demo-btn {
   flex: 1;
+  min-width: 0; /* Allow buttons to shrink on mobile */
 }
 
 .demo-customer-btn {
@@ -306,7 +357,7 @@ async function signInAsDemo(role: 'customer' | 'operator') {
 
 @media (max-width: 640px) {
   .login-container {
-    padding: 2rem;
+    padding: 2rem 1.5rem;
   }
 
   .login-header h1 {
@@ -315,6 +366,20 @@ async function signInAsDemo(role: 'customer' | 'operator') {
 
   .login-header h2 {
     font-size: 1.25rem;
+  }
+
+  .demo-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .demo-btn {
+    flex: none;
+    width: 100%;
+  }
+
+  .login-methods {
+    align-items: stretch;
   }
 }
 </style>

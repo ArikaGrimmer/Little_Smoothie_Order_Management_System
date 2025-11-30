@@ -416,6 +416,7 @@ useHead({
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: relative;
 }
 
 .back-button {
@@ -425,10 +426,19 @@ useHead({
   border-radius: 8px;
   background: rgba(255,255,255,0.2);
   transition: background 0.3s;
+  flex-shrink: 0;
 }
 
 .back-button:hover {
   background: rgba(255,255,255,0.3);
+}
+
+.header h1 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  margin: 0;
 }
 
 .customer-id {
@@ -521,13 +531,38 @@ useHead({
 }
 
 @media (max-width: 968px) {
+  .header {
+    padding: 1rem 1rem;
+  }
+
+  .header h1 {
+    font-size: 1.3rem;
+    padding: 0 1rem;
+    max-width: calc(100% - 8rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .back-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .container {
+    padding: 1.5rem 1rem;
+  }
+
   .selected-item-banner {
     grid-template-columns: 1fr;
     text-align: center;
+    padding: 1.5rem;
   }
   
   .selected-item-image {
     margin: 0 auto;
+    width: 150px;
+    height: 150px;
   }
   
   .item-tags {

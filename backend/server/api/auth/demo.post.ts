@@ -55,6 +55,24 @@ export default defineEventHandler(async (event) => {
     loggedInAt: Date.now()
   })
 
+  // Verify session was set
+  const session = await getUserSession(event)
+  console.log('[Demo Login] Session verification:', {
+    hasSession: !!session,
+    hasUser: !!session?.user,
+    userEmail: session?.user?.email
+  })
+  
+  // Check response headers to see if cookie is being set
+  const headers = event.node.res.getHeaders()
+  const setCookieHeaders = headers['set-cookie'] || []
+  console.log('[Demo Login] Set-Cookie headers:', setCookieHeaders)
+  console.log('[Demo Login] Request host:', event.node.req.headers.host)
+  console.log('[Demo Login] Request origin:', event.node.req.headers.origin)
+
+  // Return JSON response instead of redirect
+  // The client will handle the redirect after ensuring the cookie is set
+  console.log('[Demo Login] Returning success response...')
   return {
     ok: true,
     user: {

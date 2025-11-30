@@ -191,6 +191,7 @@ useHead({
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: relative;
 }
 
 .back-button {
@@ -200,6 +201,7 @@ useHead({
   border-radius: 8px;
   background: rgba(255,255,255,0.2);
   transition: background 0.3s;
+  flex-shrink: 0;
 }
 
 .back-button:hover {
@@ -209,6 +211,10 @@ useHead({
 .header h1 {
   margin: 0;
   font-size: 1.8rem;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 
 .container {
@@ -475,21 +481,53 @@ useHead({
 }
 
 @media (max-width: 768px) {
+  .header {
+    padding: 1rem 1rem;
+  }
+
+  .header h1 {
+    font-size: 1.4rem;
+    padding: 0 1rem;
+    max-width: calc(100% - 8rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .back-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .container {
+    padding: 1.5rem 1rem;
+  }
+
   .menu-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
   
+  .menu-intro {
+    margin-bottom: 2rem;
+  }
+
   .menu-intro h2 {
-    font-size: 2rem;
+    font-size: 1.75rem;
+  }
+
+  .menu-intro p {
+    font-size: 1rem;
   }
   
   .filters {
     gap: 0.5rem;
+    margin-bottom: 2rem;
   }
   
   .filter-btn {
     padding: 0.5rem 1rem;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
 }
 </style>

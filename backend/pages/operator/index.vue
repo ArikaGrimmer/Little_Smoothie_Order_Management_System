@@ -295,12 +295,14 @@ useHead({
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: relative;
 }
 
 .header-right {
   display: flex;
   align-items: center;
   gap: 1.5rem;
+  flex-shrink: 0;
 }
 
 .back-button {
@@ -310,10 +312,19 @@ useHead({
   border-radius: 8px;
   background: rgba(255,255,255,0.2);
   transition: background 0.3s;
+  flex-shrink: 0;
 }
 
 .back-button:hover {
   background: rgba(255,255,255,0.3);
+}
+
+.header h1 {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  margin: 0;
 }
 
 .stats {
@@ -537,18 +548,61 @@ h2 {
 }
 
 @media (max-width: 768px) {
-  .orders-grid {
-    grid-template-columns: 1fr;
+  .header {
+    padding: 1rem 1rem;
+    flex-wrap: wrap;
   }
-  
+
+  .header h1 {
+    font-size: 1.2rem;
+    padding: 0 1rem;
+    max-width: calc(100% - 12rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    order: 3;
+    width: 100%;
+    position: static;
+    transform: none;
+    margin-top: 0.5rem;
+  }
+
+  .back-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .header-right {
+    gap: 0.75rem;
+  }
+
   .stats {
     flex-direction: column;
     gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .stat {
+    padding: 0.4rem 0.8rem;
+  }
+
+  .container {
+    padding: 1.5rem 1rem;
+  }
+
+  .orders-grid {
+    grid-template-columns: 1fr;
   }
 
   .panel-stats {
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
 }
 </style>
