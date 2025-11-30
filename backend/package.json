@@ -9,7 +9,11 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "seed": "node seed-database.js",
-    "seed:menu": "tsx server/utils/seedMenuItems.ts"
+    "seed:menu": "tsx server/utils/seedMenuItems.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug"
   },
   "dependencies": {
     "@socket.io/redis-adapter": "^7.0.0",

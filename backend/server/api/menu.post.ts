@@ -35,6 +35,10 @@ export default defineEventHandler(async (event) => {
   const doc = { ...item };
   if (!doc.id) doc.id = genId();
 
+  // Initialize optimistic concurrency fields
+  if (typeof doc.version !== 'number') doc.version = 1;
+  doc.updatedAt = new Date();
+
   await col.insertOne(doc);
   return { ok: true, item: doc };
 });
