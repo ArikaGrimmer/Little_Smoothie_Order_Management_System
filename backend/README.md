@@ -17,12 +17,14 @@ A full-stack order management system built with Nuxt 3, Vue 3, MongoDB, and Sock
 # 1. Install dependencies
 npm install
 
-# 2. Set up MongoDB (see DATABASE_SETUP.md for details)
-mongorestore --db smoothie_order_system ../db-seed/smoothie_order_system/
+# 2. Configure environment
+# Create a .env file with your MongoDB connection string
+# MONGO_URL=mongodb://localhost:27017/smoothie_db
+# OR for MongoDB Atlas:
+# MONGO_URL=mongodb+srv://username:password@cluster.xxxxx.mongodb.net/smoothie_db
 
-# 3. Configure environment
-cp .env.example .env
-# Edit .env with your MongoDB connection string
+# 3. Seed the database
+npm run seed
 
 # 4. Start development server
 npm run dev
@@ -30,10 +32,14 @@ npm run dev
 
 Visit `http://localhost:3000` to see the application.
 
+**For detailed database seeding instructions, see [DATABASE_SEEDING.md](./DATABASE_SEEDING.md)**
+
 ## 📖 Documentation
 
 - **[Setup Instructions](./SETUP_INSTRUCTIONS.md)** - Complete setup guide
-- **[Database Setup](./DATABASE_SETUP.md)** - MongoDB configuration and seeding
+- **[Database Seeding](./DATABASE_SEEDING.md)** - How to seed the database (for sharing with partners)
+- **[Authentication](./AUTHENTICATION.md)** - Authentication system documentation
+- **[Menu System](./MENU_SYSTEM.md)** - Menu management documentation
 
 ## 🏗️ Tech Stack
 
