@@ -1,6 +1,9 @@
 import { getDB } from "../utils/mongo";
+import { requireAuth } from "../utils/auth";
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+  // Require authentication
+  await requireAuth(event);
   const db = await getDB();
 
   // Step 1: Access collections

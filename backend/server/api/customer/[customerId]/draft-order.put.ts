@@ -1,13 +1,17 @@
 import { getDB } from "../../../utils/mongo";
+import { requireAuth, getUserId } from "../../../utils/auth";
 
 export default defineEventHandler(async (event) => {
-  const customerId = event.context.params?.customerId;
+  const session = await requireAuth(event);
+  const customerId = getUserId(session);
+  const requestedCustomerId = event.context.params?.customerId;
   const body = await readBody(event);
 
-  if (!customerId) {
+  // Users can only update their own draft orders
+  if (customerId !== requestedCustomerId) {
     throw createError({
-      statusCode: 400,
-      statusMessage: "Missing customerId",
+      statusCode: 403,
+      statusMessage: "Access denied",
     });
   }
 

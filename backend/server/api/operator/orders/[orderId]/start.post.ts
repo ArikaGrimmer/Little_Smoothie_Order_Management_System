@@ -1,7 +1,11 @@
 import { getDB } from "../../../../utils/mongo";
 import { ObjectId } from "mongodb";
+import { requireRole } from "../../../../utils/auth";
 
 export default defineEventHandler(async (event) => {
+  // Require operator role
+  await requireRole(event, 'operator');
+
   const orderId = event.context.params?.orderId;
 
   if (!orderId) {

@@ -71,16 +71,36 @@ export default defineNitroPlugin((nitroApp) => {
     }
   }
 
-  // Basic auth placeholder — replace with your auth check (JWT, cookies, etc.)
-  io.use((socket, next) => {
+  // Authenticate socket connections using session data passed from client
+  io.use(async (socket, next) => {
     try {
-      // Example: token can be passed as query param: io(url, { auth: { token } })
-      const token = (socket.handshake.auth && (socket.handshake.auth as any).token) || (socket.handshake.query && (socket.handshake.query as any).token);
-      // TODO: validate token and set socket.data.user
-      socket.data.user = token ? { id: token } : { id: 'anonymous' };
+      // Client should pass user data in auth object during connection
+      const userData = (socket.handshake.auth && (socket.handshake.auth as any).user);
+      
+      if (!userData) {
+        // No auth data provided - reject connection
+        return next(new Error('Authentication required'));
+      }
+
+      // Verify the user data contains required fields
+      if (!userData.id || !userData.email) {
+        return next(new Error('Invalid authentication data'));
+      }
+
+      // Store verified user data on socket
+      socket.data.user = {
+        id: userData.id,
+        name: userData.name || userData.email,
+        email: userData.email,
+        avatar: userData.avatar,
+        roles: userData.roles || ['customer']
+      };
+
+      console.log('[socket] authenticated user', socket.data.user.email, 'roles=', socket.data.user.roles);
       return next();
     } catch (err) {
-      return next(err as Error);
+      console.error('[socket] auth error', err);
+      return next(new Error('Authentication failed'));
     }
   });
 
