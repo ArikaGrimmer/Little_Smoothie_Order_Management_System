@@ -8,16 +8,22 @@
       <p class="subtitle">Select your role to continue</p>
       
       <div class="role-cards">
+        <NuxtLink to="/menu" class="role-card menu-card">
+          <div class="icon">📋</div>
+          <h2>Browse Menu</h2>
+          <p>Explore our delicious smoothies</p>
+        </NuxtLink>
+        
         <NuxtLink to="/customer" class="role-card customer-card">
           <div class="icon">👤</div>
-          <h2>Customer</h2>
-          <p>Order your favorite smoothie</p>
+          <h2>Quick Order</h2>
+          <p>Build a custom smoothie</p>
         </NuxtLink>
         
         <NuxtLink to="/operator" class="role-card operator-card">
           <div class="icon">👨‍🍳</div>
           <h2>Operator</h2>
-          <p>Manage orders and preparation</p>
+          <p>Manage orders and menu</p>
         </NuxtLink>
       </div>
     </div>
@@ -93,6 +99,11 @@ h1 {
 .customer-card:hover {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
+}
+
+.menu-card:hover {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #333;
 }
 
 .operator-card:hover {

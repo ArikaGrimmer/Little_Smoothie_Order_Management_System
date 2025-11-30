@@ -7,6 +7,26 @@
     </header>
 
     <div class="container">
+      <!-- Selected Menu Item Display -->
+      <div v-if="selectedMenuItem" class="selected-item-banner">
+        <div class="selected-item-image">
+          <img :src="selectedMenuItem.image" :alt="selectedMenuItem.name" />
+        </div>
+        <div class="selected-item-info">
+          <h2>{{ selectedMenuItem.name }}</h2>
+          <p class="item-description">{{ selectedMenuItem.description }}</p>
+          <div class="item-tags">
+            <span v-for="benefit in selectedMenuItem.healthBenefits" :key="benefit" class="tag">
+              {{ benefit }}
+            </span>
+          </div>
+          <div class="base-price">Base Price: ${{ selectedMenuItem.basePrice.toFixed(2) }}</div>
+        </div>
+        <button @click="clearSelection" class="change-item-btn">
+          Change Item
+        </button>
+      </div>
+
       <div v-if="loading" class="loading">Loading menu...</div>
       
       <div v-else-if="error" class="error">
@@ -16,7 +36,7 @@
       <div v-else class="order-section">
         <!-- Menu Selection -->
         <div class="menu-panel">
-          <h2>Build Your Smoothie</h2>
+          <h2>{{ selectedMenuItem ? 'Customize Your Order' : 'Build Your Smoothie' }}</h2>
           
           <!-- Base Selection -->
           <div class="menu-group">
@@ -145,6 +165,18 @@ interface Menu {
   sizes: MenuItem[]
 }
 
+interface MenuItemFull {
+  id: string
+  name: string
+  description: string
+  basePrice: number
+  category: string
+  image: string
+  ingredients: string[]
+  healthBenefits: string[]
+  isAvailable: boolean
+}
+
 interface Order {
   baseId: string
   fruitIds: string[]
@@ -155,10 +187,15 @@ interface Order {
 }
 
 // Get customer ID from authenticated session
+// Use user.id (persistent database ID) instead of email
 const { user } = useUserSession()
-const customerId = computed(() => (user.value as any)?.email || 'guest')
+const customerId = computed(() => (user.value as any)?.id || (user.value as any)?.email || 'guest')
+
+const route = useRoute()
+const router = useRouter()
 
 const menu = ref<Menu>({ bases: [], fruits: [], sizes: [] })
+const selectedMenuItem = ref<MenuItemFull | null>(null)
 const order = ref<Order>({
   baseId: '',
   fruitIds: [],
@@ -173,25 +210,50 @@ const loading = ref(true)
 const error = ref('')
 
 const calculatedPrice = computed(() => {
-  if (!order.value.baseId || !order.value.sizeId) return 0
+  // If a menu item is selected, use its base price
+  const basePrice = selectedMenuItem.value 
+    ? selectedMenuItem.value.basePrice 
+    : order.value.baseId 
+      ? (menu.value.bases.find(b => b.id === order.value.baseId)?.price || 0)
+      : 0
   
-  const base = menu.value.bases.find(b => b.id === order.value.baseId)
+  if (!order.value.sizeId) return basePrice
+  
   const size = menu.value.sizes.find(s => s.id === order.value.sizeId)
   const fruits = menu.value.fruits.filter(f => order.value.fruitIds.includes(f.id))
   
-  if (!base || !size) return 0
+  if (!size) return basePrice
   
   const fruitCost = fruits.reduce((sum, f) => sum + (f.extraPrice || 0), 0)
-  return (base.price! + fruitCost) * size.multiplier!
+  return (basePrice + fruitCost) * size.multiplier!
 })
 
 const canSave = computed(() => {
-  return order.value.baseId && order.value.sizeId
+  return (selectedMenuItem.value || order.value.baseId) && order.value.sizeId
 })
 
 const canSubmit = computed(() => {
   return canSave.value && calculatedPrice.value > 0
 })
+
+async function loadSelectedMenuItem() {
+  const itemId = route.query.item as string
+  if (!itemId) return
+  
+  try {
+    const response = await $fetch(`/api/menu-items/${itemId}`)
+    if (response.ok && response.item) {
+      selectedMenuItem.value = response.item
+    }
+  } catch (e) {
+    console.error('Error loading selected item:', e)
+  }
+}
+
+function clearSelection() {
+  selectedMenuItem.value = null
+  router.push('/customer')
+}
 
 function toggleFruit(fruitId: string) {
   const index = order.value.fruitIds.indexOf(fruitId)
@@ -295,8 +357,11 @@ watch(order, async () => {
 }, { deep: true })
 
 onMounted(async () => {
-  await loadMenu()
-  await loadDraftOrder()
+  await Promise.all([
+    loadMenu(),
+    loadDraftOrder(),
+    loadSelectedMenuItem()
+  ])
 })
 
 useHead({
@@ -342,6 +407,99 @@ useHead({
   padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+.selected-item-banner {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  display: grid;
+  grid-template-columns: 200px 1fr auto;
+  gap: 2rem;
+  align-items: center;
+  position: relative;
+}
+
+.selected-item-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.selected-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.selected-item-info h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.item-description {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.item-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.tag {
+  padding: 0.25rem 0.75rem;
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.base-price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.change-item-btn {
+  padding: 0.75rem 1.5rem;
+  background: #f0f0f0;
+  color: #333;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.change-item-btn:hover {
+  background: #e0e0e0;
+  border-color: #d0d0d0;
+}
+
+@media (max-width: 968px) {
+  .selected-item-banner {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .selected-item-image {
+    margin: 0 auto;
+  }
+  
+  .item-tags {
+    justify-content: center;
+  }
 }
 
 .loading, .error {

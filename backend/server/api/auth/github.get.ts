@@ -1,7 +1,9 @@
+import { findOrCreateUser } from '../../utils/userService'
+
 export default defineOAuthGitHubEventHandler({
   config: {
     emailRequired: true,
-    scope: ['user', 'read:org']
+    scope: ['user', 'read:org', 'user:email']
   },
   async onSuccess(event, { user, tokens }) {
     try {
@@ -22,37 +24,67 @@ export default defineOAuthGitHubEventHandler({
         console.warn('Failed to fetch GitHub organizations:', orgsResponse.status)
       }
 
+      // Save or update user in database
+      const dbUser = await findOrCreateUser({
+        id: user.id.toString(),
+        email: user.email,
+        name: user.name || user.login,
+        avatar: user.avatar_url,
+        provider: 'github',
+        githubId: user.id.toString(),
+        organizations
+      })
+
+      console.log(`[GitHub OAuth] User logged in: ${dbUser.email}, roles: ${dbUser.roles.join(', ')}`)
+
+      // Set session with database user info
       await setUserSession(event, {
         user: {
-          id: user.id.toString(),
-          name: user.name || user.login,
-          email: user.email,
-          avatar: user.avatar_url,
+          id: dbUser.id,
+          name: dbUser.name,
+          email: dbUser.email,
+          avatar: dbUser.avatar,
           provider: 'github',
-          organizations,
-          roles: determineRoles(organizations)
+          organizations: dbUser.organizations,
+          roles: dbUser.roles
         },
         loggedInAt: Date.now()
       })
 
       return sendRedirect(event, '/')
     } catch (error) {
-      console.error('Error fetching GitHub user data:', error)
-      // Fallback without organizations
-      await setUserSession(event, {
-        user: {
+      console.error('Error in GitHub OAuth:', error)
+      
+      // Try fallback without organizations
+      try {
+        const dbUser = await findOrCreateUser({
           id: user.id.toString(),
-          name: user.name || user.login,
           email: user.email,
+          name: user.name || user.login,
           avatar: user.avatar_url,
           provider: 'github',
-          organizations: [],
-          roles: ['customer']
-        },
-        loggedInAt: Date.now()
-      })
+          githubId: user.id.toString(),
+          organizations: []
+        })
 
-      return sendRedirect(event, '/')
+        await setUserSession(event, {
+          user: {
+            id: dbUser.id,
+            name: dbUser.name,
+            email: dbUser.email,
+            avatar: dbUser.avatar,
+            provider: 'github',
+            organizations: [],
+            roles: dbUser.roles
+          },
+          loggedInAt: Date.now()
+        })
+
+        return sendRedirect(event, '/')
+      } catch (fallbackError) {
+        console.error('Fallback also failed:', fallbackError)
+        return sendRedirect(event, '/login?error=github_auth_failed')
+      }
     }
   },
   onError(event, error) {
@@ -60,19 +92,4 @@ export default defineOAuthGitHubEventHandler({
     return sendRedirect(event, '/login?error=github_auth_failed')
   }
 })
-
-function determineRoles(organizations: string[]): string[] {
-  const roles = ['customer'] // Default role
-
-  // If user belongs to an organization with 'smoothie' or 'operator' in the name,
-  // grant them operator role
-  if (organizations.some(org => 
-    org.toLowerCase().includes('smoothie') || 
-    org.toLowerCase().includes('operator')
-  )) {
-    roles.push('operator')
-  }
-
-  return roles
-}
 

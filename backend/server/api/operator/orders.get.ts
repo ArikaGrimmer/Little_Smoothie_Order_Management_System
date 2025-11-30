@@ -7,14 +7,17 @@ export default defineEventHandler(async (event) => {
   const db = await getDB();
   const orders = db.collection("orders");
 
-  // Query all queued orders
-  const queuedOrders = await orders
-    .find({ status: "queued" })
+  // Query all active orders (queued, blending, ready)
+  // Exclude draft and picked_up orders
+  const allOrders = await orders
+    .find({ 
+      status: { $in: ["queued", "blending", "ready"] }
+    })
     .sort({ submittedAt: 1 })  // oldest first
     .toArray();
 
   // Convert ObjectId to string and return clean objects
-  const result = queuedOrders.map(order => ({
+  const result = allOrders.map(order => ({
     id: order._id.toString(),
     ...order
   }));
