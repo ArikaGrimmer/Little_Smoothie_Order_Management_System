@@ -5,5 +5,14 @@ export default defineNuxtConfig({
   runtimeConfig: {
     mongoUrl: process.env.MONGO_URL, 
     redisUrl: process.env.REDIS_URL
+  },
+  app: {
+    head: {
+      title: 'Little Smoothie Order System',
+      meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' }
+      ]
+    }
   }
 })
