@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: socket-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    # Some ingress controllers support session affinity/sticky annotations
+    # nginx.ingress.kubernetes.io/affinity: cookie
+    # nginx.ingress.kubernetes.io/session-cookie-name: "LBSESSION"
+spec:
+  rules:
+    - host: sockets.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: socket-server-loadbalancer
+                port:
+                  number: 4001
+  # TLS block could go here
+  # tls:
+  # - hosts:
+  #   - sockets.example.com
+  #   secretName: tls-secret

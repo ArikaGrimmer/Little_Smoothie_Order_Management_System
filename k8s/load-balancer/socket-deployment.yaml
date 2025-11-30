@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: socket-server
+  labels:
+    app: socket-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: socket-server
+  template:
+    metadata:
+      labels:
+        app: socket-server
+    spec:
+      containers:
+        - name: socket-server
+          # Replace with your built image (for example: registry/myproject/socket-server:latest)
+          image: your-registry/socket-server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4001
+              name: socket-port
+          env:
+            - name: REDIS_URL
+              value: "redis://redis:6379"
+            - name: SOCKET_PORT
+              value: "4001"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: socket-port
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /
+              port: socket-port
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: socket-server-loadbalancer
+  labels:
+    app: socket-server
+  annotations:
+    # Example: cloud provider specific annotations could go here
+    # For GCP/ALB/NGINX you may add annotations for sticky sessions or TLS
+spec:
+  selector:
+    app: socket-server
+  ports:
+    - name: socket
+      port: 4001
+      targetPort: socket-port
+  type: LoadBalancer
+  sessionAffinity: ClientIP
+  externalTrafficPolicy: Cluster

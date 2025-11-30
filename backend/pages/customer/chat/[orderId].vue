@@ -28,6 +28,7 @@
             <input v-model="text" type="text" placeholder="Type a message..." @keydown.enter="send" />
             <button @click="send" class="btn btn-primary">Send</button>
           </div>
+          <div v-if="socketError" class="socket-error">{{ socketError }}</div>
         </div>
       </div>
     </div>
@@ -49,7 +50,7 @@ const order = ref<any>(null)
 const messages = ref<any[]>([])
 const text = ref('')
 
-const { socket, connected, connect, disconnect, joinRoom, leaveRoom, sendMessage, onMessage, onPresence, offMessage, offPresence } = useSocket()
+const { connected, connect, disconnect, joinRoom, leaveRoom, sendMessage, onMessage, onPresence, offMessage, offPresence, error: socketError } = useSocket()
 
 function shortId() {
   return orderId.slice(-8)
@@ -98,13 +99,11 @@ async function loadAndAuthorize() {
 
     // Connect socket and join room
     await connect(sess.user)
-    if (!connected.value) {
-      error.value = 'Failed to connect to chat server.'
-      return
-    }
 
     await joinRoom(`order:${orderId}`)
 
+    offMessage()
+    offPresence()
     onMessage((m:any) => {
       messages.value.push(m)
     })
@@ -137,7 +136,9 @@ async function send() {
 
 onBeforeUnmount(async () => {
   try {
-    await leaveRoom(`order:${orderId}`)
+    if (connected.value) {
+      await leaveRoom(`order:${orderId}`)
+    }
   } catch (e) { /* ignore */ }
   disconnect()
   offMessage()
@@ -160,4 +161,5 @@ useHead({ title: 'Order Chat' })
 .message { margin-bottom:0.5rem }
 .composer { display:flex; gap:0.5rem }
 .composer input { flex:1; padding:0.5rem }
+.socket-error { margin-top:0.5rem; color:#c62828; font-size:0.9rem }
 </style>
