@@ -28,6 +28,8 @@ export async function requireRole(event: H3Event, role: string) {
 }
 
 export function getUserId(session: any): string {
-  return (session.user as any)?.email || (session.user as any)?.id
+  // Return the consistent user ID from database
+  // This ID is set during login and persists across sessions
+  return (session.user as any)?.id || (session.user as any)?.email
 }
 

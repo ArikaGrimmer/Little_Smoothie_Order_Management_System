@@ -23,8 +23,17 @@ export default defineNuxtConfig({
   session: {
     maxAge: 60 * 60 * 24 * 7, // 7 days
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
-    }
+      // In development, allow cookies over HTTP for local network access
+      secure: false, // Must be false for HTTP (IP addresses)
+      // For IP addresses, try 'lax' - some browsers may still block it
+      // If this doesn't work, the browser might be blocking cookies for IP addresses entirely
+      sameSite: 'lax',
+      httpOnly: true,
+      path: '/',
+      // Don't set domain - this allows cookies to work with both localhost and IP addresses
+      // Setting domain would restrict cookies to that specific domain
+    },
+    // Add session secret for better state management
+    password: process.env.NUXT_SESSION_PASSWORD || 'dev-session-secret-change-in-production-min-32-chars'
   }
 })

@@ -7,18 +7,23 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "seed": "node seed-database.js",
+    "seed:menu": "tsx server/utils/seedMenuItems.ts"
   },
   "dependencies": {
+    "@socket.io/redis-adapter": "^7.0.0",
+    "dotenv": "^17.2.3",
+    "ioredis": "^5.0.0",
     "mongodb": "^7.0.0",
     "nuxt": "^4.2.1",
     "nuxt-auth-utils": "^0.5.25",
-    "vue": "^3.5.25",
-    "vue-router": "^4.6.3",
     "socket.io": "^4.8.0",
     "socket.io-client": "^4.8.0",
-    "@socket.io/redis-adapter": "^7.0.0",
-    "ioredis": "^5.0.0"
+    "vue": "^3.5.25",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.6"
   }
 }
-

@@ -36,14 +36,14 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // Step 3: Update to done
+  // Step 3: Update to ready
   const now = Date.now();
 
   await orders.updateOne(
     { _id: order._id },
     {
       $set: {
-        status: "done",
+        status: "ready",
         updatedAt: now,
         finishedAt: now
       }
