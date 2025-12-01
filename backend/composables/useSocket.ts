@@ -29,7 +29,8 @@ export function useSocket() {
         const publicConfig = runtimeConfig.public as Record<string, unknown>
         const socketUrl = (publicConfig?.socketUrl as string) || 'http://localhost:4001'
 
-        const newSocket = io(socketUrl, {
+  console.debug('[Socket] Connecting to', socketUrl)
+  const newSocket = io(socketUrl, {
           auth: user ? { user } : undefined,
           transports: ['websocket', 'polling'],
           reconnection: true,

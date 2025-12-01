@@ -4,14 +4,19 @@ const http = require('http')
 const proxy = require('http-proxy')
 
 const proxyServer = proxy.createProxyServer()
-const COOKIE_NAME = 'lb_target'
-const targets = [
-  { url: 'http://127.0.0.1:8132', available: false },
-  { url: 'http://127.0.0.1:8133', available: false },
-  // { url: 'http://127.0.0.1:8134', available: false },
-  // { url: 'http://127.0.0.1:8135', available: false },
-]
-const port = parseInt(process.env.PORT) || 8131
+const COOKIE_NAME = process.env.COOKIE_NAME || 'lb_target'
+const targetList = (process.env.TARGETS || 'http://127.0.0.1:8132,http://127.0.0.1:8133')
+  .split(',')
+  .map((url) => url.trim())
+  .filter((url) => url.length > 0)
+
+if (targetList.length === 0) {
+  console.error('[loadBalancer] No targets provided. Set TARGETS env variable.')
+  process.exit(1)
+}
+
+const targets = targetList.map((url) => ({ url, available: false }))
+const port = parseInt(process.env.PORT, 10) || 8131
 
 setInterval(async () => {
   for (let i = 0; i < targets.length; i++) {

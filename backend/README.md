@@ -128,6 +128,25 @@ curl http://localhost:3000/api/menu
 
 See [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md#troubleshooting) for common issues and solutions.
 
+## 🎛️ Load-Balanced Chat Demo
+
+Want to capture logs from multiple backend replicas while chatting? Use the bundled demo runner:
+
+```bash
+# From the backend directory
+npm run demo:cluster
+```
+
+The script will:
+
+- Build the production bundle if needed.
+- Start two Nitro servers (ports `8132` and `8133`) with their Socket.IO servers on `9132` and `9133`.
+- Launch two lightweight Node load balancers that expose:
+	- `http://127.0.0.1:8131` for regular web traffic.
+	- `http://127.0.0.1:9131` for Socket.IO/WebSocket traffic.
+
+Open two browser profiles or an incognito window and navigate to `http://127.0.0.1:8131`. Logs in the terminal are prefixed (`[api-1]`, `[api-2]`, `[lb-http]`, `[lb-socket]`) so you can show which replica handled each request or socket event. Press `Ctrl+C` to stop all processes.
+
 ## 📝 Development
 
 ```bash
