@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSocket } from '~/composables/useSocket'
 
@@ -52,9 +52,7 @@ const text = ref('')
 
 const { connected, connect, disconnect, joinRoom, leaveRoom, sendMessage, onMessage, onPresence, offMessage, offPresence, error: socketError } = useSocket()
 
-function shortId() {
-  return orderId.slice(-8)
-}
+const shortId = computed(() => orderId.slice(-8))
 
 function formatStatus(s: string) {
   const map: Record<string,string> = { queued: 'Queued', blending: 'In Preparation', ready: 'Ready', picked_up: 'Completed', draft: 'Draft' }
