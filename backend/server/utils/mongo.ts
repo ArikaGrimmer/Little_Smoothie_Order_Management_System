@@ -7,7 +7,7 @@ export async function getMongoClient() {
   if (client) return client;
 
   const config = useRuntimeConfig();
-  const mongoUrl = config.mongoUrl;
+  const mongoUrl = config.mongoUrl || process.env.MONGO_URL;
 
   if (!mongoUrl) {
     throw new Error("Missing MONGO_URL in runtimeConfig");

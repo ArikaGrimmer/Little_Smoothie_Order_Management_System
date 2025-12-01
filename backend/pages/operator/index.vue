@@ -57,9 +57,14 @@
                 <p><strong>Ice:</strong> {{ order.iceLevel }}%</p>
                 <p v-if="order.extraNote" class="note"><strong>Note:</strong> {{ order.extraNote }}</p>
               </div>
-              <button @click="startOrder(order.id)" class="btn btn-primary">
-                Start Preparation
-              </button>
+              <div class="card-actions">
+                <NuxtLink :to="`/operator/chat/${order.id}`" class="btn btn-outline">
+                  💬 Chat with Customer
+                </NuxtLink>
+                <button @click="startOrder(order.id)" class="btn btn-primary">
+                  Start Preparation
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -94,9 +99,14 @@
                 <p><strong>Ice:</strong> {{ order.iceLevel }}%</p>
                 <p v-if="order.extraNote" class="note"><strong>Note:</strong> {{ order.extraNote }}</p>
               </div>
-              <button @click="finishOrder(order.id)" class="btn btn-success">
-                Mark as Ready
-              </button>
+              <div class="card-actions">
+                <NuxtLink :to="`/operator/chat/${order.id}`" class="btn btn-outline">
+                  💬 Chat with Customer
+                </NuxtLink>
+                <button @click="finishOrder(order.id)" class="btn btn-success">
+                  Mark as Ready
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -156,6 +166,9 @@ interface Order {
   extraNote?: string
   price: number
   submittedAt?: number
+  customerName?: string
+  menuItemName?: string
+  drinkName?: string
 }
 
 const orders = ref<Order[]>([])
@@ -506,6 +519,13 @@ h2 {
   font-style: italic;
 }
 
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
 .btn {
   width: 100%;
   padding: 0.875rem;
@@ -515,6 +535,9 @@ h2 {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
 }
 
 .btn-primary {
@@ -535,6 +558,19 @@ h2 {
 .btn-success:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+}
+
+.btn-outline {
+  background: white;
+  color: #4facfe;
+  border: 2px solid #4facfe;
+}
+
+.btn-outline:hover {
+  background: #4facfe;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
 }
 
 .ready-badge {

@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: smoothie-seed-database
+  namespace: smoothie
+  labels:
+    app.kubernetes.io/name: seed-database
+    app.kubernetes.io/part-of: smoothie-stack
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        job: smoothie-seed-database
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: seed
+          image: yuri1920/smoothie-backend:v2
+          imagePullPolicy: IfNotPresent
+          command:
+            - node
+            - seed-database.js
+          envFrom:
+            - configMapRef:
+                name: smoothie-config
+            - secretRef:
+                name: smoothie-secrets
+  backoffLimit: 4

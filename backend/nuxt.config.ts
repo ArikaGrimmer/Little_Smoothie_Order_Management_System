@@ -7,7 +7,8 @@ export default defineNuxtConfig({
     mongoUrl: process.env.MONGO_URL, 
     redisUrl: process.env.REDIS_URL,
     public: {
-      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+      siteUrl: process.env.NUXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || 'http://localhost:4001'
     }
   },
   app: {
@@ -20,6 +21,7 @@ export default defineNuxtConfig({
     }
   },
   // Session configuration for nuxt-auth-utils
+  // @ts-expect-error: Provided by nuxt-auth-utils module
   session: {
     maxAge: 60 * 60 * 24 * 7, // 7 days
     cookie: {

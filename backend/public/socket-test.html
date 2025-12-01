@@ -35,7 +35,16 @@
         try {
           console.log('[test] attempting connect to', server);
           // do not force transports — allow default polling->upgrade flow
-          socket = io(server, { auth: { token: 'dev-user-1' } });
+          socket = io(server, {
+            auth: {
+              user: {
+                id: 'dev-tester',
+                email: 'dev@test.local',
+                name: 'Dev Tester',
+                roles: ['operator']
+              }
+            }
+          });
 
           socket.on('connect', () => { console.log('[test] connected', socket.id); log('connected: ' + socket.id); });
           socket.on('connect_error', (err) => { console.error('[test] connect_error', err); log('connect_error: ' + err.message || err); });

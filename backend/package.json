@@ -10,10 +10,15 @@
     "postinstall": "nuxt prepare",
     "seed": "node seed-database.js",
     "seed:menu": "tsx server/utils/seedMenuItems.ts",
+<<<<<<< HEAD
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug"
+=======
+    "demo:cluster": "node tools/load-balanced-demo/start.mjs",
+    "test:e2e": "playwright test"
+>>>>>>> 94f4335e730ad5a6233b625d36e558d8612a7617
   },
   "dependencies": {
     "@socket.io/redis-adapter": "^7.0.0",
@@ -28,7 +33,12 @@
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@playwright/test": "^1.40.0",
+=======
+    "@playwright/test": "^1.48.2",
+    "esbuild": "^0.27.0",
+>>>>>>> 94f4335e730ad5a6233b625d36e558d8612a7617
     "tsx": "^4.20.6"
   }
 }

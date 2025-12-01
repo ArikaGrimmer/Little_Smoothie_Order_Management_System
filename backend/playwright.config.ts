@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -62,3 +63,28 @@ export default defineConfig({
   },
 });
 
+=======
+import { defineConfig, devices } from '@playwright/test'
+
+const baseURL = process.env.BASE_URL || 'http://127.0.0.1:3000'
+
+export default defineConfig({
+  testDir: './tests/e2e',
+  timeout: 60_000,
+  expect: {
+    timeout: 10_000
+  },
+  use: {
+    baseURL,
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure'
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] }
+    }
+  ]
+})
+>>>>>>> 94f4335e730ad5a6233b625d36e558d8612a7617

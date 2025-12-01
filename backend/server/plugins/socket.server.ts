@@ -17,6 +17,7 @@ export default defineNitroPlugin((nitroApp) => {
   const config = useRuntimeConfig();
   const redisUrl = config.redisUrl || process.env.REDIS_URL;
   const port = Number(process.env.SOCKET_PORT || 4001);
+  const publicConfig = config.public as Record<string, unknown> | undefined;
 
   if (!redisUrl) {
     console.warn('[socket] REDIS_URL not configured; continuing without Redis adapter');
@@ -50,7 +51,7 @@ export default defineNitroPlugin((nitroApp) => {
   });
 
   const isDev = process.env.NODE_ENV !== 'production';
-  const allowedOrigin = process.env.NUXT_DEV_URL || 'http://localhost:3001';
+  const allowedOrigin = (publicConfig?.siteUrl as string) || process.env.NUXT_DEV_URL || 'http://localhost:3000';
   const io = new Server(httpServer, {
     cors: {
       // In development allow any origin to make local testing easier (file:// and multiple dev ports)
