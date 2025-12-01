@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smoothie-redis
+  namespace: smoothie
+  labels:
+    app: smoothie-redis
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/part-of: smoothie-stack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smoothie-redis
+  template:
+    metadata:
+      labels:
+        app: smoothie-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7
+          ports:
+            - containerPort: 6379
+              name: redis
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          readinessProbe:
+            tcpSocket:
+              port: redis
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: redis
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smoothie-redis
+  namespace: smoothie
+  labels:
+    app: smoothie-redis
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/part-of: smoothie-stack
+spec:
+  selector:
+    app: smoothie-redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: redis
+  type: ClusterIP

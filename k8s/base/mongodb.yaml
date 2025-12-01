@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: smoothie-mongodb
+  namespace: smoothie
+  labels:
+    app: smoothie-mongodb
+    app.kubernetes.io/name: mongodb
+    app.kubernetes.io/part-of: smoothie-stack
+spec:
+  clusterIP: None
+  ports:
+    - name: mongo
+      port: 27017
+      targetPort: mongo
+  selector:
+    app: smoothie-mongodb
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: smoothie-mongodb
+  namespace: smoothie
+  labels:
+    app: smoothie-mongodb
+    app.kubernetes.io/name: mongodb
+    app.kubernetes.io/part-of: smoothie-stack
+spec:
+  serviceName: smoothie-mongodb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: smoothie-mongodb
+  template:
+    metadata:
+      labels:
+        app: smoothie-mongodb
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:7
+          args:
+            - "--bind_ip_all"
+          ports:
+            - containerPort: 27017
+              name: mongo
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          readinessProbe:
+            tcpSocket:
+              port: mongo
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: mongo
+            initialDelaySeconds: 30
+            periodSeconds: 20
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi

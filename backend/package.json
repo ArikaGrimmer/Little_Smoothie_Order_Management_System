@@ -10,7 +10,8 @@
     "postinstall": "nuxt prepare",
     "seed": "node seed-database.js",
     "seed:menu": "tsx server/utils/seedMenuItems.ts",
-    "demo:cluster": "node tools/load-balanced-demo/start.mjs"
+    "demo:cluster": "node tools/load-balanced-demo/start.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@socket.io/redis-adapter": "^7.0.0",
@@ -25,6 +26,8 @@
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.48.2",
+    "esbuild": "^0.27.0",
     "tsx": "^4.20.6"
   }
 }

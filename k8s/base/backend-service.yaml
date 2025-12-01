@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: smoothie-backend
+  namespace: smoothie
+  labels:
+    app: smoothie-backend
+    app.kubernetes.io/name: backend
+    app.kubernetes.io/part-of: smoothie-stack
+spec:
+  selector:
+    app: smoothie-backend
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+    - name: socket
+      port: 4001
+      targetPort: socket
+  type: ClusterIP

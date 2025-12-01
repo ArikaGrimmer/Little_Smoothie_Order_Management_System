@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smoothie-config
+  namespace: smoothie
+  labels:
+    app.kubernetes.io/name: smoothie-config
+    app.kubernetes.io/part-of: smoothie-stack
+data:
+  MONGO_URL: mongodb://smoothie-mongodb.smoothie.svc.cluster.local:27017/smoothie_order_system
+  REDIS_URL: redis://smoothie-redis.smoothie.svc.cluster.local:6379
+  SOCKET_PORT: "4001"
+  NUXT_PUBLIC_SITE_URL: https://smoothie.example.com
+  NUXT_PUBLIC_SOCKET_URL: https://smoothie.example.com
+  NODE_ENV: production

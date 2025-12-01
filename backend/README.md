@@ -124,6 +124,22 @@ Test menu API:
 curl http://localhost:3000/api/menu
 ```
 
+### End-to-End Demo Order Flow
+
+Install Playwright once and run the automated "demo customer submits an order" scenario:
+
+```bash
+npx playwright install
+npm run test:e2e
+```
+
+Set `BASE_URL` (or `LB_BASE_URL`) if you launch the app on a non-default host. Example for the demo cluster:
+
+```bash
+set BASE_URL=http://127.0.0.1:8131
+npm run test:e2e
+```
+
 ## 🐛 Troubleshooting
 
 See [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md#troubleshooting) for common issues and solutions.
@@ -147,7 +163,26 @@ The script will:
 
 Open two browser profiles or an incognito window and navigate to `http://127.0.0.1:8131`. Logs in the terminal are prefixed (`[api-1]`, `[api-2]`, `[lb-http]`, `[lb-socket]`) so you can show which replica handled each request or socket event. Press `Ctrl+C` to stop all processes.
 
-## 📝 Development
+## � Containerization & Kubernetes
+
+```bash
+# Build the production output and container image
+npm ci
+npm run build
+docker build -t your-registry/smoothie-backend:latest .
+docker push your-registry/smoothie-backend:latest
+
+# Apply the Kubernetes stack via kustomize (edit k8s/base first)
+kubectl apply -k ../k8s/base
+
+# Seed Mongo once pods are ready
+kubectl create job --from=job/smoothie-seed-database smoothie-seed-$(date +%s) -n smoothie
+# (PowerShell) kubectl create job --from=job/smoothie-seed-database "smoothie-seed-$(Get-Date -UFormat %s)" -n smoothie
+```
+
+Update `k8s/base/app-configmap.yaml` with the public site URL, socket URL, and database connection strings that match your cluster. Replace `your-registry/smoothie-backend:latest` anywhere it appears with your published image (for example, `ghcr.io/<user>/smoothie-backend:latest`).
+
+## �📝 Development
 
 ```bash
 # Development with hot reload
